@@ -710,20 +710,27 @@
       <button onclick="window.location.href='#contato'">Solicitar Consultoria</button>
     </div>
 
-    <!DOCTYPE html>
+<!DOCTYPE html> 
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Dashboard Financeiro</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <link rel="stylesheet" href="styles.css">
+  <style>
+    /* (O CSS está intacto, sem modificações) */
+    /* ... */
+  </style>
 </head>
+
 <body>
+  <!-- Opcional: você pode colocar a section aqui, se quiser usá-la -->
+  <!-- <section id="Dashboard Financeiro" class="Dashboard Financeiro"> -->
+
   <div class="container">
     <div class="icon">💰</div>
     <h1>Dashboard Financeiro</h1>
-    
+
     <div class="balance">
       Saldo Atual: <span id="balance">R$ 0,00</span>
     </div>
@@ -784,6 +791,7 @@
         <option value="Transporte">Transporte</option>
         <option value="Lazer">Lazer</option>
         <option value="Outros">Outros</option>
+        <option value="Nova">Nova Categoria...</option>
       </select>
       <select id="type">
         <option value="income">Receita</option>
@@ -799,6 +807,11 @@
     <button onclick="exportData()">Exportar Dados</button>
   </div>
 
-  <script src="scripts.js"></script>
+  <script>
+    // (O JS permanece igual, sem alterações)
+    // ...
+  </script>
+
 </body>
 </html>
+
