@@ -330,7 +330,7 @@ function gerarGraficoEvolucao(evolucao, anos) {
         }
     });
 }
-
+// calculadora do Dashboard Financeiro
 let transactions = JSON.parse(localStorage.getItem('transactions')) || [];
 
 function formatCurrency(value) {
@@ -400,7 +400,56 @@ function deleteTransaction(index) {
   renderTransactions();
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-  updateSummary();
-  renderTransactions();
-});
+    function updateChart() {
+      const ctx = document.getElementById('transactionChart').getContext('2d');
+      const income = transactions.filter(t => t.type === 'income').reduce((acc, curr) => acc + curr.amount, 0);
+      const expenses = transactions.filter(t => t.type === 'expense').reduce((acc, curr) => acc + curr.amount, 0);
+
+      if (window.transactionChart) {
+        if (typeof window.transactionChart.destroy === 'function') {
+          window.transactionChart.destroy();
+        }
+      }
+
+      window.transactionChart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+          labels: ['Receitas', 'Despesas'],
+          datasets: [{
+            data: [income, expenses],
+            backgroundColor: ['#4caf50', '#f44336']
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: {
+              position: 'top'
+            }
+          }
+        }
+      });
+    }
+
+    function filterTransactions() {
+      const categoryFilter = document.getElementById('categoryFilter').value;
+      const typeFilter = document.getElementById('typeFilter').value;
+
+      let filteredTransactions = transactions;
+
+      if (categoryFilter) {
+        filteredTransactions = filteredTransactions.filter(t => t.category === categoryFilter);
+      }
+
+      if (typeFilter) {
+        filteredTransactions = filteredTransactions.filter(t => t.type === typeFilter);
+      }
+
+      renderTransactions(filteredTransactions);
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      updateSummary();
+      renderTransactions();
+    });
+
