@@ -331,74 +331,81 @@ function gerarGraficoEvolucao(evolucao, anos) {
     });
 }
 // calculadora do Dashboard Financeiro
-let transactions = JSON.parse(localStorage.getItem('transactions')) || [];
+et transactions = JSON.parse(localStorage.getItem('transactions')) || [];
 
-function formatCurrency(value) {
-  return new Intl.NumberFormat('pt-BR', {
-    style: 'currency',
-    currency: 'BRL'
-  }).format(value);
-}
+    function formatCurrency(value) {
+      return new Intl.NumberFormat('pt-BR', {
+        style: 'currency',
+        currency: 'BRL'
+      }).format(value);
+    }
 
-function updateSummary() {
-  const income = transactions.filter(t => t.type === 'income').reduce((acc, curr) => acc + curr.amount, 0);
-  const expenses = transactions.filter(t => t.type === 'expense').reduce((acc, curr) => acc + curr.amount, 0);
-  const balance = income - expenses;
+    function updateSummary() {
+      const income = transactions.filter(t => t.type === 'income').reduce((acc, curr) => acc + curr.amount, 0);
+      const expenses = transactions.filter(t => t.type === 'expense').reduce((acc, curr) => acc + curr.amount, 0);
+      const balance = income - expenses;
 
-  document.getElementById('balance').textContent = formatCurrency(balance);
-  document.getElementById('income').textContent = formatCurrency(income);
-  document.getElementById('expenses').textContent = formatCurrency(expenses);
+      document.getElementById('balance').textContent = formatCurrency(balance);
+      document.getElementById('income').textContent = formatCurrency(income);
+      document.getElementById('expenses').textContent = formatCurrency(expenses);
 
-  updateChart();
-}
+      updateChart();
+    }
 
-function addTransaction() {
-  const description = document.getElementById('description').value;
-  const amount = parseFloat(document.getElementById('amount').value);
-  const category = document.getElementById('category').value;
-  const type = document.getElementById('type').value;
+    function addTransaction() {
+      const description = document.getElementById('description').value;
+      const amount = parseFloat(document.getElementById('amount').value);
+      const category = document.getElementById('category').value;
+      const type = document.getElementById('type').value;
 
-  if (!description || !amount || !category || !type) {
-    alert('Por favor, preencha todos os campos.');
-    return;
-  }
+      if (!description || !amount || !category || !type) {
+        alert('Por favor, preencha todos os campos.');
+        return;
+      }
 
-  const transaction = { description, amount, category, type };
-  transactions.push(transaction);
-  localStorage.setItem('transactions', JSON.stringify(transactions));
+      const transaction = { description, amount, category, type };
+      transactions.push(transaction);
+      localStorage.setItem('transactions', JSON.stringify(transactions));
 
-  updateSummary();
-  renderTransactions();
-}
+      updateSummary();
+      renderTransactions();
 
-function renderTransactions(filteredTransactions = transactions) {
-  const transactionList = document.getElementById('transaction-list');
-  transactionList.innerHTML = '';
+      document.getElementById('description').value = '';
+      document.getElementById('amount').value = '';
+      document.getElementById('category').value = '';
+      document.getElementById('type').value = '';
+    }
 
-  if (filteredTransactions.length === 0) {
-    transactionList.innerHTML = '<tr><td colspan="5" style="text-align: center; color: #999;">Sem transações</td></tr>';
-    return;
-  }
+    function renderTransactions(filteredTransactions = transactions) {
+      const transactionList = document.getElementById('transaction-list');
+      transactionList.innerHTML = '';
 
-  filteredTransactions.forEach((t, index) => {
-    const row = document.createElement('tr');
-    row.innerHTML = `
-      <td>${t.description}</td>
-      <td>${t.category}</td>
-      <td>${t.type === 'income' ? 'Receita' : 'Despesa'}</td>
-      <td>${formatCurrency(t.amount)}</td>
-      <td><button onclick="deleteTransaction(${index})">Excluir</button></td>
-    `;
-    transactionList.appendChild(row);
-  });
-}
+      if (filteredTransactions.length === 0) {
+        transactionList.innerHTML = '<tr><td colspan="5" style="text-align: center; color: #999;">Sem transações</td></tr>';
+        return;
+      }
 
-function deleteTransaction(index) {
-  transactions.splice(index, 1);
-  localStorage.setItem('transactions', JSON.stringify(transactions));
-  updateSummary();
-  renderTransactions();
-}
+      filteredTransactions.forEach((t, index) => {
+        const row = document.createElement('tr');
+
+        row.innerHTML = `
+          <td>${t.description}</td>
+          <td>${t.category}</td>
+          <td>${t.type === 'income' ? 'Receita' : 'Despesa'}</td>
+          <td>${formatCurrency(t.amount)}</td>
+          <td><button onclick="deleteTransaction(${index})">Excluir</button></td>
+        `;
+
+        transactionList.appendChild(row);
+      });
+    }
+
+    function deleteTransaction(index) {
+      transactions.splice(index, 1);
+      localStorage.setItem('transactions', JSON.stringify(transactions));
+      updateSummary();
+      renderTransactions();
+    }
 
     function updateChart() {
       const ctx = document.getElementById('transactionChart').getContext('2d');
