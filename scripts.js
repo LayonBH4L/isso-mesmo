@@ -330,4 +330,125 @@ function gerarGraficoEvolucao(evolucao, anos) {
         }
     });
 }
+
 // calculadora do Dashboard Financeiro
+const transactions = [];
+const transactionChart = document.getElementById("transactionChart").getContext("2d");
+let chart = null;
+
+function updateBalance() {
+  const income = transactions
+    .filter(t => t.type === "income")
+    .reduce((sum, t) => sum + t.amount, 0);
+  const expenses = transactions
+    .filter(t => t.type === "expense")
+    .reduce((sum, t) => sum + t.amount, 0);
+
+  document.getElementById("income").textContent = `R$ ${income.toFixed(2)}`;
+  document.getElementById("expenses").textContent = `R$ ${expenses.toFixed(2)}`;
+  document.getElementById("balance").textContent = `R$ ${(income - expenses).toFixed(2)}`;
+}
+
+function renderTransactions() {
+  const tbody = document.getElementById("transaction-list");
+  tbody.innerHTML = transactions.length
+    ? transactions.map((t, i) => `
+      <tr>
+        <td>${t.description}</td>
+        <td>${t.category}</td>
+        <td>${t.type === "income" ? "Receita" : "Despesa"}</td>
+        <td>R$ ${t.amount.toFixed(2)}</td>
+        <td><button onclick="deleteTransaction(${i})">Excluir</button></td>
+      </tr>`).join("")
+    : `<tr><td colspan="5" style="text-align: center; color: #999;">Sem transações</td></tr>`;
+}
+
+function deleteTransaction(index) {
+  transactions.splice(index, 1);
+  updateBalance();
+  renderTransactions();
+  updateChart();
+}
+
+function addTransaction() {
+  const description = document.getElementById("description").value;
+  const amount = parseFloat(document.getElementById("amount").value);
+  const category = document.getElementById("category").value;
+  const type = document.getElementById("type").value;
+
+  if (!description || !amount || !category || !type) {
+    alert("Preencha todos os campos!");
+    return;
+  }
+
+  transactions.push({ description, amount, category, type });
+  updateBalance();
+  renderTransactions();
+  updateChart();
+
+  document.getElementById("description").value = "";
+  document.getElementById("amount").value = "";
+  document.getElementById("category").value = "";
+  document.getElementById("type").value = "";
+}
+
+function updateChart() {
+  const categories = [...new Set(transactions.map(t => t.category))];
+  const data = categories.map(c => transactions
+    .filter(t => t.category === c)
+    .reduce((sum, t) => sum + t.amount, 0));
+
+  if (chart) chart.destroy();
+
+  chart = new Chart(transactionChart, {
+    type: "pie",
+    data: {
+      labels: categories,
+      datasets: [{
+        data,
+        backgroundColor: ["#ff6384", "#36a2eb", "#cc65fe", "#ffce56"],
+        hoverOffset: 4
+      }]
+    }
+  });
+}
+
+function filterTransactions() {
+  const category = document.getElementById("categoryFilter").value;
+  const type = document.getElementById("typeFilter").value;
+
+  const filteredTransactions = transactions.filter(t =>
+    (!category || t.category === category) &&
+    (!type || t.type === type)
+  );
+
+  renderFilteredTransactions(filteredTransactions);
+}
+
+function renderFilteredTransactions(filteredTransactions) {
+  const tbody = document.getElementById("transaction-list");
+  tbody.innerHTML = filteredTransactions.length
+    ? filteredTransactions.map((t, i) => `
+      <tr>
+        <td>${t.description}</td>
+        <td>${t.category}</td>
+        <td>${t.type === "income" ? "Receita" : "Despesa"}</td>
+        <td>R$ ${t.amount.toFixed(2)}</td>
+        <td><button onclick="deleteTransaction(${i})">Excluir</button></td>
+      </tr>`).join("")
+    : `<tr><td colspan="5" style="text-align: center; color: #999;">Sem transações</td></tr>`;
+}
+
+function exportData() {
+  const data = JSON.stringify(transactions, null, 2);
+  const blob = new Blob([data], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "transacoes.json";
+  a.click();
+
+  URL.revokeObjectURL(url);
+}
+
